@@ -1,0 +1,85 @@
+.home-page {
+  display: flex;
+  flex-direction: column;
+}
+
+.home-header {
+  padding-top: 12px;
+}
+
+.home-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 36px;
+  padding-top: 100px;
+}
+
+.hero {
+  text-align: center;
+}
+
+.hero h1 {
+  font-size: 32px;
+  font-weight: 700;
+  color: #6e6345;
+}
+
+.hero p {
+   font-size: 16px;
+  max-width: 280px;
+  margin: 0 auto;
+}
+
+.features-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.feature-card {
+  background: #e8dfd1;
+  border: 1px solid #f3f4f6;
+  border-radius: 14px;
+  min-height: 160px;
+  padding: 20px 14px;
+  text-align: center;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+}
+
+.feature-icon {
+  color: #7a6d45;
+  margin-bottom: 4px;
+}
+
+.feature-card h3 {
+  font-size: 14px;
+  margin-bottom: 8px;
+}
+
+.feature-card p {
+  font-size: 12px;
+  line-height: 16px;
+  color: #4a5565;
+}
+
+.home-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.home-footer {
+  text-align: center;
+  font-size: 11px;
+  color: #98a2b3;
+  margin-top: 48px;
+}
