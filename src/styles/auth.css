@@ -110,3 +110,11 @@
 .auth-switch a {
   font-weight: 600;
 }
+.auth-error {
+  color: #b42318;
+  font-size: 13px;
+  background: #fef3f2;
+  border: 1px solid #fecdca;
+  border-radius: 8px;
+  padding: 10px 12px;
+}

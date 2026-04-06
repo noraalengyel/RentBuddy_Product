@@ -1,8 +1,11 @@
 import { User, LogOut, MapPin, Search, Star, Bookmark } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import Logo from "../components/Logo";
 import "../styles/profile.css";
 
 export default function Profile() {
+  const navigate = useNavigate();
+
   const savedUser = JSON.parse(localStorage.getItem("user"));
 
   const user = savedUser || {
@@ -16,13 +19,20 @@ export default function Profile() {
 
   const firstLetter = user.fullName?.charAt(0)?.toUpperCase() || "U";
 
+  function handleLogout() {
+    localStorage.removeItem("isLoggedIn");
+    navigate("/");
+  }
+
   return (
     <div className="page-container profile-page">
       <header className="profile-header">
         <Logo />
         <div className="profile-header-icons">
           <User size={18} />
-          <LogOut size={18} />
+          <button className="icon-button" onClick={handleLogout}>
+            <LogOut size={18} />
+          </button>
         </div>
       </header>
 

@@ -46,6 +46,7 @@ export default function Signup() {
     const userData = {
       fullName: formData.fullName,
       email: formData.email,
+      password: formData.password,
       role: formData.role,
       location: "Birmingham",
       memberSince: "Jan 2026",
@@ -54,6 +55,7 @@ export default function Signup() {
     };
 
     localStorage.setItem("user", JSON.stringify(userData));
+    localStorage.setItem("isLoggedIn", "true");
     navigate("/profile");
   }
 
