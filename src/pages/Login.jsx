@@ -1,9 +1,16 @@
 import { ArrowLeft } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import Logo from "../components/Logo";
 import "../styles/auth.css";
 
 export default function Login() {
+  const navigate = useNavigate();
+
+  function handleSubmit(e) {
+    e.preventDefault();
+    navigate("/profile");
+  }
+
   return (
     <div className="page-container auth-page">
       <div className="auth-topbar">
@@ -19,7 +26,7 @@ export default function Login() {
         <h1>Welcome Back</h1>
         <p>Log in to continue your rental search</p>
 
-        <form className="auth-form">
+        <form className="auth-form" onSubmit={handleSubmit}>
           <div className="input-group">
             <label>Email</label>
             <input type="email" placeholder="you.email@example.com" />
