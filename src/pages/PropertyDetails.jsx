@@ -14,63 +14,44 @@ import {
 } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
 import "../styles/property-details.css";
+import { useParams } from "react-router-dom";
+import { getPropertyById } from "../utils/propertyStore";
 
 export default function PropertyDetails() {
-  const navigate = useNavigate();
-  const { state } = useLocation();
+    const navigate = useNavigate();
+    const { state } = useLocation();
+    const { id } = useParams();
 
-const defaultProperty = {
-  id: 1,
-  title: "Modern Studio Apartment",
-  price: 750,
-  rating: 4.5,
-  reviews: 12,
-  address: "25 King Street, Aberdeen AB24 5RU",
-  nearbyTo: ["0.5 miles from City Centre"],
-  type: "Studio",
-  furnished: "Furnished",
-  bills: true,
-  image:
-    "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?auto=format&fit=crop&w=900&q=80",
-  deposit: 750,
-  councilTax: 0,
-  moveIn: "Available now",
-  pros: [
-    "Perfect for students",
-    "Bills included in rent",
-    "Modern appliances",
-    "Good Wi-Fi connection",
-    "Close to city centre",
-  ],
-  cons: [
-    "Limited storage space",
-    "Can get noisy on weekends",
-    "No parking available",
-  ],
-  landlord: "Trusted Landlord",
-  landlordRating: 4.8,
-  tenantReviews: [
-  {
+    const defaultProperty = {
     id: 1,
-    name: "Anonymous Tenant",
-    rating: 5,
-    text: "Perfect studio for a student. Everything essential was included and the landlord replied quickly whenever I had a question.",
-    time: "1 hr. ago",
-  },
-  {
-    id: 2,
-    name: "Anonymous Tenant",
-    rating: 4,
-    text: "Really convenient location and easy to maintain. It is a bit compact, but ideal if you want something simple and central.",
-    time: "6 hrs. ago",
-  },
-],
-};
+    title: "Modern Studio Apartment",
+    price: 750,
+    rating: 4.5,
+    reviews: 12,
+    address: "25 King Street, Aberdeen AB24 5RU",
+    nearbyTo: ["0.5 miles from City Centre"],
+    type: "Studio",
+    furnished: "Furnished",
+    bills: true,
+    image:
+        "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?auto=format&fit=crop&w=900&q=80",
+    deposit: 750,
+    councilTax: 0,
+    moveIn: "Available now",
+    pros: [],
+    cons: [],
+    landlord: "Trusted Landlord",
+    landlordRating: 4.8,
+    tenantReviews: [],
+    };
 
-const property = {
-  ...defaultProperty,
-  ...(state?.property || {}),
-};
+    const property = 
+        getPropertyById(id) ||
+        {
+            ...defaultProperty,
+            ...(state?.property || {}),
+        };
+        
   const totalMonthly =
     property.price + (property.councilTax || 0);
 
@@ -222,7 +203,7 @@ const property = {
                 <div className="review-avatar">👤</div>
                 <div>
                   <strong>{review.name}</strong>
-                  <small>{review.time}</small>
+                  <small>{review.date || review.time}</small>
                 </div>
               </div>
 
@@ -233,12 +214,20 @@ const property = {
             </div>
 
             <p>{review.text}</p>
+            <small className="review-bills">
+                Bills: {review.billsNote || (property.bills ? "Included" : `£${property.billsCost || 0}/month`)}
+            </small>
           </div>
         ))}
       </section>
 
       <div className="details-actions">
-        <button className="secondary-btn">View Reviews</button>
+        <button className="secondary-btn"
+            onClick={() => {console.log("View Reviews clicked", property); navigate(`/property/${property.id}/reviews`, { state: { property } });
+            }}
+        >
+             View Reviews
+        </button>
         <button className="primary-btn"onClick={() => navigate("/contact-landlord", { state: { property } })}
             >Contact Landlord</button>
       </div>

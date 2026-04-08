@@ -31,9 +31,18 @@ export default function ContactLandlord() {
   }, [property.landlord]);
 
   function handleSubmit(e) {
-    e.preventDefault();
-    alert(`Message sent to ${managedByText} about ${property.title}`);
-  }
+  e.preventDefault();
+
+  navigate("/message-sent", {
+    state: {
+      property,
+      fullName,
+      email,
+      phone,
+      message,
+    },
+  });
+}
 
   return (
     <div className="page-container contact-page">

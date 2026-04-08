@@ -9,7 +9,10 @@ import AuthRedirect from "./components/AuthRedirect";
 import Results from "./pages/Results";
 import PropertyDetails from "./pages/PropertyDetails";
 import ContactLandlord from "./pages/ContactLandlord";
-
+import MessageSent from "./pages/MessageSent";
+import PropertyReviews from "./pages/PropertyReviews";
+import SubmitReview from "./pages/SubmitReview";
+import ReviewSubmitted from "./pages/ReviewSubmitted";
 
 
 export default function App() {
@@ -51,6 +54,14 @@ export default function App() {
       <Route path="/property/:id" element={<PropertyDetails />} />
 
       <Route path="/contact-landlord" element={<ContactLandlord />} />
+
+      <Route path="/message-sent" element={<MessageSent />} />
+
+      <Route path="/property/:id/reviews" element={<PropertyReviews />} />
+
+      <Route path="/property/:id/review/new" element={<SubmitReview/>} />
+
+      <Route path="/review-submitted" element={<ReviewSubmitted />} />
     </Routes>
   );
 }
