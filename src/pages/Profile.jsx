@@ -1,12 +1,17 @@
 import { User, LogOut, MapPin, Search, Star, Bookmark } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
 import Logo from "../components/Logo";
 import "../styles/profile.css";
-import { useEffect, useState } from "react";
 import { getSavedProperties } from "../utils/savedPropertiesStore";
 
 export default function Profile() {
   const navigate = useNavigate();
+  const [savedCount, setSavedCount] = useState(0);
+
+  useEffect(() => {
+    setSavedCount(getSavedProperties().length);
+  }, []);
 
   const savedUser = JSON.parse(localStorage.getItem("user"));
 
@@ -16,25 +21,21 @@ export default function Profile() {
     location: "Birmingham",
     memberSince: "Jan 2026",
     reviewsWritten: 3,
-    savedProperties: savedCount,
+    
   };
 
-  const firstLetter = user.fullName?.charAt(0)?.toUpperCase() || "U";
-
-  const [savedCount, setSavedCount] = useState(0);
-
-  useEffect(() => {
-    setSavedCount(getSavedProperties().length);
-  }, []);
-
-  const displayedSavedCount = savedCount;
+  const displayName = user.full_name || user.fullName || "Unknown User";
+  const memberSince = user.member_since || user.memberSince || "Jan 2026";
+  const location = user.location || "Birmingham";
+  const reviewsWritten = user.reviewsWritten || 3;
+  const firstLetter = displayName.charAt(0).toUpperCase();
 
   function handleLogout() {
     localStorage.removeItem("isLoggedIn");
     navigate("/");
   }
 
-  function goToBrowse(){
+  function goToBrowse() {
     navigate("/browse");
   }
 
@@ -55,28 +56,28 @@ export default function Profile() {
           <div className="profile-avatar">{firstLetter}</div>
 
           <div className="profile-info">
-            <h2>{user.fullName}</h2>
+            <h2>{displayName}</h2>
             <p>{user.email}</p>
 
             <div className="profile-location">
               <MapPin size={14} />
-              <span>{user.location}</span>
+              <span>{location}</span>
             </div>
 
             <span className="member-badge">
-              Member since {user.memberSince}
+              Member since {memberSince}
             </span>
           </div>
         </div>
 
         <div className="profile-stats">
           <div className="stat-item">
-            <strong>{user.reviewsWritten}</strong>
+            <strong>{reviewsWritten}</strong>
             <span>Reviews Written</span>
           </div>
 
           <div className="stat-item">
-            <strong>{displayedSavedCount}</strong>
+            <strong>{savedCount}</strong>
             <span>Saved Properties</span>
           </div>
         </div>
@@ -105,7 +106,10 @@ export default function Profile() {
           </div>
         </div>
 
-        <div className="action-card" onClick={() => navigate("/saved-properties")}>
+        <div
+          className="action-card"
+          onClick={() => navigate("/saved-properties")}
+        >
           <div className="action-icon light">
             <Bookmark size={18} />
           </div>
@@ -146,13 +150,13 @@ export default function Profile() {
               <p>
                 You joined <strong>RentBuddy</strong>
               </p>
-              <small>{user.memberSince}</small>
+              <small>{memberSince}</small>
             </div>
           </div>
         </div>
       </section>
 
-      <button className="profile-bottom-btn">
+      <button className="profile-bottom-btn" onClick={goToBrowse}>
         <Search size={18} />
         <span>View Properties</span>
       </button>

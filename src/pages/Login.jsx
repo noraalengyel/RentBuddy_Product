@@ -2,6 +2,7 @@ import { useState } from "react";
 import { ArrowLeft } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import Logo from "../components/Logo";
+import { API_BASE_URL } from "../config/api";
 import "../styles/auth.css";
 
 export default function Login() {
@@ -14,6 +15,7 @@ export default function Login() {
   });
 
   const [errorMessage, setErrorMessage] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   function handleChange(e) {
     const { name, value, type, checked } = e.target;
@@ -24,34 +26,46 @@ export default function Login() {
     }));
   }
 
-  function handleSubmit(e) {
+  async function handleSubmit(e) {
     e.preventDefault();
-
-    const savedUser = JSON.parse(localStorage.getItem("user"));
-
-    if (!savedUser) {
-      setErrorMessage("No account found. Please create an account first.");
-      return;
-    }
+    setErrorMessage("");
 
     if (!formData.email || !formData.password) {
       setErrorMessage("Please enter your email and password.");
       return;
     }
 
-    if (formData.email.trim().toLowerCase() !== savedUser.email.trim().toLowerCase()) {
-      setErrorMessage("Email not found. Please check your details or sign up.");
-      return;
-    }
+    try {
+      setIsSubmitting(true);
 
-    if (formData.password !== savedUser.password) {
-      setErrorMessage("Incorrect password. Please try again.");
-      return;
-    }
+      const response = await fetch(`${API_BASE_URL}/auth/login`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email: formData.email,
+          password: formData.password,
+        }),
+      });
 
-    setErrorMessage("");
-    localStorage.setItem("isLoggedIn", "true");
-    navigate("/profile");
+      const data = await response.json();
+
+      if (!response.ok) {
+        setErrorMessage(data.message || "Login failed.");
+        return;
+      }
+
+      localStorage.setItem("user", JSON.stringify(data.user));
+      localStorage.setItem("isLoggedIn", "true");
+
+      navigate("/profile");
+    } catch (error) {
+      console.error("Login request failed:", error);
+      setErrorMessage("Unable to connect to the server.");
+    } finally {
+      setIsSubmitting(false);
+    }
   }
 
   return (
@@ -107,8 +121,8 @@ export default function Login() {
 
           {errorMessage && <p className="auth-error">{errorMessage}</p>}
 
-          <button type="submit" className="btn-primary">
-            Log In
+          <button type="submit" className="btn-primary" disabled={isSubmitting}>
+            {isSubmitting ? "Logging In..." : "Log In"}
           </button>
         </form>
 

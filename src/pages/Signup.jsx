@@ -2,6 +2,7 @@ import { useState } from "react";
 import { ArrowLeft } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import Logo from "../components/Logo";
+import { API_BASE_URL } from "../config/api";
 import "../styles/auth.css";
 
 export default function Signup() {
@@ -16,6 +17,9 @@ export default function Signup() {
     agreedToTerms: false,
   });
 
+  const [errorMessage, setErrorMessage] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   function handleChange(e) {
     const { name, value, type, checked } = e.target;
 
@@ -25,38 +29,64 @@ export default function Signup() {
     }));
   }
 
-  function handleSubmit(e) {
+  async function handleSubmit(e) {
     e.preventDefault();
+    setErrorMessage("");
 
-    if (!formData.fullName || !formData.email || !formData.password || !formData.confirmPassword || !formData.role) {
-      alert("Please fill in all fields.");
+    if (
+      !formData.fullName ||
+      !formData.email ||
+      !formData.password ||
+      !formData.confirmPassword ||
+      !formData.role
+    ) {
+      setErrorMessage("Please fill in all fields.");
       return;
     }
 
     if (formData.password !== formData.confirmPassword) {
-      alert("Passwords do not match.");
+      setErrorMessage("Passwords do not match.");
       return;
     }
 
     if (!formData.agreedToTerms) {
-      alert("Please agree to the Terms of Service and Privacy Policy.");
+      setErrorMessage("Please agree to the Terms of Service and Privacy Policy.");
       return;
     }
 
-    const userData = {
-      fullName: formData.fullName,
-      email: formData.email,
-      password: formData.password,
-      role: formData.role,
-      location: "Birmingham",
-      memberSince: "Jan 2026",
-      reviewsWritten: 3,
-      savedProperties: 5,
-    };
+    try {
+      setIsSubmitting(true);
 
-    localStorage.setItem("user", JSON.stringify(userData));
-    localStorage.setItem("isLoggedIn", "true");
-    navigate("/profile");
+      const response = await fetch(`${API_BASE_URL}/auth/signup`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          fullName: formData.fullName,
+          email: formData.email,
+          password: formData.password,
+          role: formData.role,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        setErrorMessage(data.message || "Signup failed.");
+        return;
+      }
+
+      localStorage.setItem("user", JSON.stringify(data.user));
+      localStorage.setItem("isLoggedIn", "true");
+
+      navigate("/profile");
+    } catch (error) {
+      console.error("Signup request failed:", error);
+      setErrorMessage("Unable to connect to the server.");
+    } finally {
+      setIsSubmitting(false);
+    }
   }
 
   return (
@@ -147,8 +177,10 @@ export default function Signup() {
             </span>
           </label>
 
-          <button type="submit" className="btn-primary">
-            Create Account
+          {errorMessage && <p className="auth-error">{errorMessage}</p>}
+
+          <button type="submit" className="btn-primary" disabled={isSubmitting}>
+            {isSubmitting ? "Creating Account..." : "Create Account"}
           </button>
         </form>
 
