@@ -1,4 +1,4 @@
-import { ArrowLeft, Star, BarChart3, MessageSquare } from "lucide-react";
+import { ArrowLeft, Star, BarChart3, MessageSquare, Image as ImageIcon } from "lucide-react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { useEffect, useMemo, useState } from "react";
 import "../styles/property-reviews.css";
@@ -32,8 +32,6 @@ function createFallbackBars(reviewList) {
   }));
 }
 
-
-
 export default function PropertyReviews() {
   const navigate = useNavigate();
   const { state } = useLocation();
@@ -52,6 +50,9 @@ export default function PropertyReviews() {
   const [summary, setSummary] = useState(null);
   const [loading, setLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState("");
+
+  const [onlyWithPhotos, setOnlyWithPhotos] = useState(false);
+  const [onlyFourPlus, setOnlyFourPlus] = useState(false);
 
   useEffect(() => {
     async function loadReviewData() {
@@ -78,6 +79,18 @@ export default function PropertyReviews() {
 
     loadReviewData();
   }, [id]);
+
+  const filteredReviews = useMemo(() => {
+    return reviewList.filter((review) => {
+      const hasPhotos = Array.isArray(review.photos) && review.photos.length > 0;
+      const isFourPlus = Number(review.rating) >= 4;
+
+      if (onlyWithPhotos && !hasPhotos) return false;
+      if (onlyFourPlus && !isFourPlus) return false;
+
+      return true;
+    });
+  }, [reviewList, onlyWithPhotos, onlyFourPlus]);
 
   const bars = useMemo(() => {
     if (!summary?.distribution?.length) {
@@ -242,13 +255,33 @@ export default function PropertyReviews() {
           </button>
         </div>
 
+        <div className="review-filters">
+          <button
+            type="button"
+            className={`filter-chip ${onlyWithPhotos ? "active" : ""}`}
+            onClick={() => setOnlyWithPhotos((prev) => !prev)}
+          >
+            <ImageIcon size={13} />
+            <span>With Photos</span>
+          </button>
+
+          <button
+            type="button"
+            className={`filter-chip ${onlyFourPlus ? "active" : ""}`}
+            onClick={() => setOnlyFourPlus((prev) => !prev)}
+          >
+            <Star size={13} />
+            <span>4+ Stars</span>
+          </button>
+        </div>
+
         <div className="tenant-review-list">
-          {reviewList.length === 0 ? (
+          {filteredReviews.length === 0 ? (
             <article className="tenant-review-card">
-              <p>No reviews yet. Be the first to leave one.</p>
+              <p>No reviews match the selected filters.</p>
             </article>
           ) : (
-            reviewList.map((review) => (
+            filteredReviews.map((review) => (
               <article className="tenant-review-card" key={review.id}>
                 <div className="tenant-review-top">
                   <div className="tenant-review-user">
@@ -276,21 +309,15 @@ export default function PropertyReviews() {
                 <div className="mini-category-grid">
                   <div>
                     <span>Landlord Com</span>
-                    <em>
-                      {"★".repeat(review.categoryRatings?.landlordCommunication || 0)}
-                    </em>
+                    <em>{"★".repeat(review.categoryRatings?.landlordCommunication || 0)}</em>
                   </div>
                   <div>
                     <span>Maintenance</span>
-                    <em>
-                      {"★".repeat(review.categoryRatings?.maintenanceSpeed || 0)}
-                    </em>
+                    <em>{"★".repeat(review.categoryRatings?.maintenanceSpeed || 0)}</em>
                   </div>
                   <div>
                     <span>Cleanliness</span>
-                    <em>
-                      {"★".repeat(review.categoryRatings?.cleanliness || 0)}
-                    </em>
+                    <em>{"★".repeat(review.categoryRatings?.cleanliness || 0)}</em>
                   </div>
                   <div>
                     <span>Safety</span>
@@ -298,13 +325,24 @@ export default function PropertyReviews() {
                   </div>
                   <div>
                     <span>Value for Money</span>
-                    <em>
-                      {"★".repeat(review.categoryRatings?.valueForMoney || 0)}
-                    </em>
+                    <em>{"★".repeat(review.categoryRatings?.valueForMoney || 0)}</em>
                   </div>
                 </div>
 
                 <p className="tenant-review-text">{review.text}</p>
+
+                {Array.isArray(review.photos) && review.photos.length > 0 && (
+                  <div className="review-photo-grid">
+                    {review.photos.map((photo, index) => (
+                      <img
+                        key={index}
+                        src={photo.url}
+                        alt={`Review upload ${index + 1}`}
+                        className="review-photo"
+                      />
+                    ))}
+                  </div>
+                )}
 
                 <div className="tenant-review-footer">
                   <small>Bills: {review.billsNote || "Included"}</small>

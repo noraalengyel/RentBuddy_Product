@@ -324,3 +324,45 @@
   font-size: 9px;
   color: #8a6d1d;
 }
+
+.review-filters {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.filter-chip {
+  border: 1px solid #cfc2b1;
+  background: #e6ddcf;
+  color: #3f3725;
+  border-radius: 999px;
+  padding: 7px 10px;
+  font-size: 10px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+}
+
+.filter-chip.active {
+  background: #8a7b53;
+  border-color: #8a7b53;
+  color: white;
+}
+
+.review-photo-grid {
+  margin-top: 10px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+
+.review-photo {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  object-fit: cover;
+  border-radius: 10px;
+  border: 1px solid #d8cec0;
+  background: #f3ede4;
+  display: block;
+}

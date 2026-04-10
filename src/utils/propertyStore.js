@@ -37,12 +37,27 @@ export async function getReviewSummary(id) {
 }
 
 export async function addReviewToProperty(id, reviewPayload) {
+  const formData = new FormData();
+
+  Object.entries(reviewPayload).forEach(([key, value]) => {
+    if (key === "photos") return;
+    if (key === "categoryRatings") {
+      formData.append("categoryRatings", JSON.stringify(value));
+      return;
+    }
+
+    formData.append(key, value ?? "");
+  });
+
+  if (Array.isArray(reviewPayload.photos)) {
+    reviewPayload.photos.forEach((file) => {
+      formData.append("photos", file);
+    });
+  }
+
   const response = await fetch(`${API_BASE_URL}/properties/${id}/reviews`, {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(reviewPayload),
+    body: formData,
   });
 
   return handleJsonResponse(response, "Failed to submit review");
@@ -100,8 +115,8 @@ export async function getPropertyInquiries(propertyId) {
   return handleJsonResponse(response, "Failed to fetch property inquiries");
 }
 
-export function getReviewsByUser(userEmail, userName) {
-  const properties = getProperties();
+export async function getReviewsByUser(userEmail, userName) {
+  const properties = await getProperties();
 
   const reviews = [];
 
