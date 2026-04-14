@@ -17,6 +17,7 @@ export const initialProperties = [
     councilTax: 95,
     moveIn: "Available now",
     landlord: "Trusted Landlord",
+    landlordEmail: "trustedlandlord@example.com",
     landlordRating: 4.7,
     pros: [
       "Perfect for students",
@@ -116,6 +117,7 @@ tenantReviews: [
     councilTax: 110,
     moveIn: "From next month",
     landlord: "Responsive Owner",
+    landlordEmail: "responsiveowner@example.com",
     landlordRating: 4.0,
     pros: [
       "Large shared living area",
@@ -182,6 +184,7 @@ tenantReviews: [
     councilTax: 0,
     moveIn: "Available now",
     landlord: "Top Rated Host",
+    landlordEmail: "topratedhost@example.com",
     landlordRating: 4.8,
     pros: [
       "Excellent city-centre location",
@@ -264,6 +267,7 @@ tenantReviews: [
     councilTax: 0,
     moveIn: "Available in 2 weeks",
     landlord: "Student Lettings Co.",
+    landlordEmail: "studentlettingsco@example.com",
     landlordRating: 4.1,
     pros: [
       "Very close to RGU",
@@ -330,6 +334,7 @@ tenantReviews: [
     councilTax: 85,
     moveIn: "Available now",
     landlord: "Local Agency",
+    landlordEmail: "localagency@example.com",
     landlordRating: 3.9,
     pros: [
       "Very affordable",
@@ -397,6 +402,7 @@ tenantReviews: [
     councilTax: 140,
     moveIn: "Available next week",
     landlord: "Premium Lets",
+    landlordEmail: "premiumlets@example.com",
     landlordRating: 4.9,
     pros: [
       "Beautiful modern design",
@@ -479,6 +485,7 @@ tenantReviews: [
     councilTax: 70,
     moveIn: "Available now",
     landlord: "Budget Rooms Ltd",
+    landlordEmail: "budgetroomsltd@example.com",
     landlordRating: 3.6,
     pros: [
       "Very affordable rent",
@@ -545,6 +552,7 @@ tenantReviews: [
     councilTax: 0,
     moveIn: "Available in 1 week",
     landlord: "Professional Lets",
+    landlordEmail: "professionallets@example.com",
     landlordRating: 4.4,
     pros: [
       "Very quiet area",
@@ -611,6 +619,7 @@ tenantReviews: [
     councilTax: 0,
     moveIn: "Available now",
     landlord: "Dundee Student Homes",
+    landlordEmail: "dundeestudenthomes@example.com",
     landlordRating: 4.2,
     pros: [
       "Central Dundee location",
@@ -677,6 +686,7 @@ tenantReviews: [
     councilTax: 0,
     moveIn: "From next month",
     landlord: "Capital Rentals",
+    landlordEmail: "capitalrentals@example.com",
     landlordRating: 4.7,
     pros: [
       "Stylish modern interior",
@@ -743,6 +753,7 @@ tenantReviews: [
     councilTax: 0,
     moveIn: "Available now",
     landlord: "City Stay Aberdeen",
+    landlordEmail: "citystayaberdeen@example.com",
     landlordRating: 4.3,
     pros: [
       "Bills included",
@@ -809,6 +820,7 @@ tenantReviews: [
     councilTax: 90,
     moveIn: "Available in 3 weeks",
     landlord: "Independent Owner",
+    landlordEmail: "independentowner@example.com",
     landlordRating: 3.8,
     pros: [
       "Good space for the price",

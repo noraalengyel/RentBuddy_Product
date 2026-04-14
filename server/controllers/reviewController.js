@@ -297,6 +297,7 @@ function getReviewsByUser(req, res) {
       rating: row.overall_rating,
       text: row.review_text,
       date: formatReviewDate(row.created_at),
+      createdAt: row.created_at,
       billsNote: row.monthly_bills ? `£${row.monthly_bills}/month` : "Included",
       wouldRentAgain: Boolean(row.would_rent_again),
       isAnonymous: Boolean(row.is_anonymous),

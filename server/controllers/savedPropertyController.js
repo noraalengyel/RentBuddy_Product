@@ -12,6 +12,7 @@ function mapProperty(row) {
     councilTax: row.council_tax,
     moveIn: row.move_in,
     landlordRating: row.landlord_rating,
+    savedAt: row.stated_at || row.created_at || null,
   };
 }
 
@@ -88,7 +89,9 @@ function getSavedProperties(req, res) {
 
     const rows = db
       .prepare(
-        `SELECT p.*
+        `SELECT 
+            p.*, 
+            sp.created_at AS saved_at
          FROM saved_properties sp
          JOIN properties p ON p.id = sp.property_id
          WHERE sp.user_id = ?

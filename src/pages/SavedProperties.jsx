@@ -18,7 +18,7 @@ import { useNavigate } from "react-router-dom";
 import {
   getSavedProperties,
   removeSavedProperty,
-} from "../utils/savedPropertiesStore";
+} from "../utils/propertyStore";
 import "../styles/saved-properties.css";
 
 function formatSavedTime(savedAt) {
@@ -48,25 +48,56 @@ export default function SavedProperties() {
   const [viewMode, setViewMode] = useState("list");
   const [selectedCompareIds, setSelectedCompareIds] = useState([]);
 
-  useEffect(() => {
-    const saved = getSavedProperties();
-    setSavedProperties(Array.isArray(saved) ? saved : []);
+  const savedUserRaw = localStorage.getItem("user");
+  const savedUser = savedUserRaw ? JSON.parse(savedUserRaw) : null;
 
-    if (Array.isArray(saved) && saved.length > 0) {
-      setSelectedCompareIds(saved.slice(0, 3).map((property) => property.id));
+ useEffect(() => {
+  async function loadSavedProperties() {
+    try {
+      if (!savedUser?.id) {
+        setSavedProperties([]);
+        setSelectedCompareIds([]);
+        return;
+      }
+
+      const saved = await getSavedProperties(savedUser.id);
+      const safeSaved = Array.isArray(saved) ? saved : [];
+
+      setSavedProperties(safeSaved);
+
+      if (safeSaved.length > 0) {
+        setSelectedCompareIds(safeSaved.slice(0, 3).map((property) => property.id));
+      } else {
+        setSelectedCompareIds([]);
+      }
+    } catch (error) {
+      console.error("Failed to load saved properties:", error);
+      setSavedProperties([]);
+      setSelectedCompareIds([]);
     }
-  }, []);
+  }
+
+  loadSavedProperties();
+}, [savedUser?.id]);
 
   const savedCountText = useMemo(() => {
     if (savedProperties.length === 1) return "1 property saved";
     return `${savedProperties.length} properties saved`;
   }, [savedProperties.length]);
 
-  function handleRemove(propertyId) {
-    const updated = removeSavedProperty(propertyId);
-    setSavedProperties(updated);
+async function handleRemove(propertyId) {
+  if (!savedUser?.id) return;
+
+  try {
+    await removeSavedProperty(savedUser.id, propertyId);
+    setSavedProperties((prev) =>
+      prev.filter((property) => property.id !== propertyId)
+    );
     setSelectedCompareIds((prev) => prev.filter((id) => id !== propertyId));
+  } catch (error) {
+    console.error("Failed to remove saved property:", error);
   }
+}
 
   function toggleCompareSelection(propertyId) {
     setSelectedCompareIds((prev) => {

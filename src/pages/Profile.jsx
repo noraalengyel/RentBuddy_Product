@@ -1,15 +1,46 @@
 import { User, LogOut, MapPin, Search, Star, Bookmark } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Logo from "../components/Logo";
 import "../styles/profile.css";
-import { getSavedProperties } from "../utils/savedPropertiesStore";
-import { getUserReviews } from "../utils/propertyStore";
+import {
+  getSavedProperties,
+  getUserReviews,
+} from "../utils/propertyStore";
+
+function formatRelativeTime(dateString) {
+  if (!dateString) return "Recently";
+
+  const date = new Date(dateString);
+  if (Number.isNaN(date.getTime())) return "Recently";
+
+  const now = new Date();
+  const diffMs = now - date;
+  const diffMinutes = Math.floor(diffMs / (1000 * 60));
+  const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+  const diffWeeks = Math.floor(diffDays / 7);
+
+  if (diffMinutes < 1) return "Just now";
+  if (diffMinutes < 60) return `${diffMinutes} min ago`;
+  if (diffHours < 24) return `${diffHours} hour${diffHours > 1 ? "s" : ""} ago`;
+  if (diffDays === 1) return "1 day ago";
+  if (diffDays < 7) return `${diffDays} days ago`;
+  if (diffWeeks === 1) return "1 week ago";
+  if (diffWeeks < 5) return `${diffWeeks} weeks ago`;
+
+  return date.toLocaleDateString("en-GB", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  });
+}
 
 export default function Profile() {
   const navigate = useNavigate();
-  const [savedCount, setSavedCount] = useState(0);
-  const [reviewCount, setReviewCount] = useState(0);
+  const [savedProperties, setSavedProperties] = useState([]);
+  const [myReviews, setMyReviews] = useState([]);
+  const [loadingActivity, setLoadingActivity] = useState(true);
 
   const savedUserRaw = localStorage.getItem("user");
   const savedUser = savedUserRaw ? JSON.parse(savedUserRaw) : null;
@@ -21,36 +52,81 @@ export default function Profile() {
     memberSince: "Jan 2026",
   };
 
+  const userId = savedUser?.id || null;
   const displayName = user.full_name || user.fullName || "Unknown User";
   const memberSince = user.member_since || user.memberSince || "Jan 2026";
   const location = user.location || "";
   const firstLetter = displayName.charAt(0).toUpperCase();
 
   useEffect(() => {
-    setSavedCount(getSavedProperties().length);
-  }, []);
-
-  useEffect(() => {
-    async function loadReviewCount() {
+    async function loadProfileData() {
       try {
-        const savedUserRaw = localStorage.getItem("user");
-        const savedUser = savedUserRaw ? JSON.parse(savedUserRaw) : null;
+        setLoadingActivity(true);
 
-        if (!savedUser?.id) {
-          setReviewCount(0);
+        if (!userId) {
+          setSavedProperties([]);
+          setMyReviews([]);
           return;
         }
 
-        const reviews = await getUserReviews(savedUser.id);
-        setReviewCount(reviews.length);
+        const [savedData, reviewsData] = await Promise.all([
+          getSavedProperties(userId),
+          getUserReviews(userId),
+        ]);
+
+        setSavedProperties(Array.isArray(savedData) ? savedData : []);
+        setMyReviews(Array.isArray(reviewsData) ? reviewsData : []);
       } catch (error) {
-        console.error("Failed to load review count:", error);
-        setReviewCount(0);
+        console.error("Failed to load profile data:", error);
+        setSavedProperties([]);
+        setMyReviews([]);
+      } finally {
+        setLoadingActivity(false);
       }
     }
 
-    loadReviewCount();
-  }, []);
+    loadProfileData();
+  }, [userId]);
+
+  const savedCount = savedProperties.length;
+  const reviewCount = myReviews.length;
+
+  const recentActivity = useMemo(() => {
+    const savedActivities = savedProperties.map((property) => ({
+      id: `saved-${property.id}`,
+      prefix: "You saved ",
+      highlight: property.title,
+      dateValue: property.savedAt || null,
+      timeLabel: formatRelativeTime(property.savedAt),
+      light: false,
+    }));
+
+    const reviewActivities = myReviews.map((review) => ({
+      id: `review-${review.id}`,
+      prefix: "You reviewed ",
+      highlight: review.propertyTitle,
+      dateValue: review.createdAt || review.date || null,
+      timeLabel: formatRelativeTime(review.createdAt),
+      light: false,
+    }));
+
+    const joinedActivity = {
+      id: "joined-rentbuddy",
+      prefix: "You joined ",
+      highlight: "RentBuddy",
+      dateValue: null,
+      timeLabel: memberSince,
+      light: true,
+    };
+
+    const merged = [...savedActivities, ...reviewActivities].sort((a, b) => {
+      const aTime = a.dateValue ? new Date(a.dateValue).getTime() : 0;
+      const bTime = b.dateValue ? new Date(b.dateValue).getTime() : 0;
+      return bTime - aTime;
+    });
+
+    return merged.length > 0 ? merged.slice(0, 4) : [joinedActivity];
+  }, [savedProperties, myReviews, memberSince]);
 
   function handleLogout() {
     localStorage.removeItem("isLoggedIn");
@@ -91,9 +167,7 @@ export default function Profile() {
               <span>{location}</span>
             </div>
 
-            <span className="member-badge">
-              Member since {memberSince}
-            </span>
+            <span className="member-badge">Member since {memberSince}</span>
           </div>
         </div>
 
@@ -151,35 +225,27 @@ export default function Profile() {
         <h3>Recent Activity</h3>
 
         <div className="activity-card">
-          <div className="activity-item">
-            <span className="dot"></span>
-            <div>
-              <p>
-                You saved <strong>Modern 2-Bed Apartment</strong>
-              </p>
-              <small>2 days ago</small>
+          {loadingActivity ? (
+            <div className="activity-item">
+              <span className="dot"></span>
+              <div>
+                <p>Loading your recent activity...</p>
+              </div>
             </div>
-          </div>
-
-          <div className="activity-item">
-            <span className="dot"></span>
-            <div>
-              <p>
-                You reviewed <strong>Student Studio on High Street</strong>
-              </p>
-              <small>1 week ago</small>
-            </div>
-          </div>
-
-          <div className="activity-item">
-            <span className="dot light"></span>
-            <div>
-              <p>
-                You joined <strong>RentBuddy</strong>
-              </p>
-              <small>{memberSince}</small>
-            </div>
-          </div>
+          ) : (
+            recentActivity.map((activity) => (
+              <div className="activity-item" key={activity.id}>
+                <span className={`dot ${activity.light ? "light" : ""}`}></span>
+                <div>
+                  <p>
+                    {activity.prefix}
+                    <strong>{activity.highlight}</strong>
+                  </p>
+                  <small>{activity.timeLabel}</small>
+                </div>
+              </div>
+            ))
+          )}
         </div>
       </section>
 

@@ -13,12 +13,14 @@ import {
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import "../styles/property-details.css";
 
-import { getPropertyById } from "../utils/propertyStore";
+
 import { useEffect, useState } from "react";
 import {
-  isPropertySaved,
-  toggleSavedProperty,
-} from "../utils/savedPropertiesStore";
+  getPropertyById,
+  saveProperty,
+  removeSavedProperty,
+  checkSavedProperty,
+} from "../utils/propertyStore";
 
 export default function PropertyDetails() {
   const navigate = useNavigate();
@@ -55,6 +57,10 @@ export default function PropertyDetails() {
   const [errorMessage, setErrorMessage] = useState("");
   const [saved, setSaved] = useState(false);
 
+  const savedUserRaw = localStorage.getItem("user");
+  const savedUser = savedUserRaw ? JSON.parse(savedUserRaw) : null;
+  const [savingFavourite, setSavingFavourite] = useState(false);
+
   useEffect(() => {
     async function loadProperty() {
       try {
@@ -80,10 +86,46 @@ export default function PropertyDetails() {
     loadProperty();
   }, [id, state]);
 
-  useEffect(() => {
-    if (!property?.id) return;
-    setSaved(isPropertySaved(property.id));
-  }, [property]);
+ useEffect(() => {
+  async function loadSavedStatus() {
+    if (!property?.id || !savedUser?.id) {
+      setSaved(false);
+      return;
+    }
+
+    try {
+      const result = await checkSavedProperty(savedUser.id, property.id);
+      setSaved(Boolean(result.saved));
+    } catch (error) {
+      console.error("Failed to check saved status:", error);
+      setSaved(false);
+    }
+  }
+
+  
+
+  loadSavedStatus();
+}, [property?.id, savedUser?.id]);
+
+async function handleToggleSaved() {
+  if (!savedUser?.id || !property?.id || savingFavourite) return;
+
+  try {
+    setSavingFavourite(true);
+
+    if (saved) {
+      await removeSavedProperty(savedUser.id, property.id);
+      setSaved(false);
+    } else {
+      await saveProperty(savedUser.id, property.id);
+      setSaved(true);
+    }
+  } catch (error) {
+    console.error("Failed to update favourite:", error);
+  } finally {
+    setSavingFavourite(false);
+  }
+}
 
   if (loading) {
     return (
@@ -137,10 +179,8 @@ export default function PropertyDetails() {
         <div className="details-header-icons">
           <button
             className={`icon-button ${saved ? "saved-heart-btn" : ""}`}
-            onClick={() => {
-              const updatedSavedState = toggleSavedProperty(property);
-              setSaved(updatedSavedState);
-            }}
+            onClick={handleToggleSaved}
+            disabled={savingFavourite}
           >
             <Heart size={16} fill={saved ? "currentColor" : "none"} />
           </button>
@@ -315,7 +355,8 @@ export default function PropertyDetails() {
             navigate("/contact-landlord", { state: { property } })
           }
         >
-          Contact Landlord
+          Make an Enquiry
+          <small>via email</small>
         </button>
       </div>
     </div>

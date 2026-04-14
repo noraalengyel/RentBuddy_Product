@@ -1,7 +1,6 @@
 import { useMemo, useState } from "react";
 import { ArrowLeft, Home, MapPin, User, Mail, Phone, Send } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { sendPropertyInquiry } from "../utils/propertyStore";
 import "../styles/contact-landlord.css";
 
 export default function ContactLandlord() {
@@ -13,6 +12,7 @@ export default function ContactLandlord() {
     title: "Modern Studio Apartment",
     address: "25 King Street, Aberdeen AB24 5RU",
     landlord: "Property Management",
+    landlordEmail: "landlord@example.com",
   };
 
   const property = {
@@ -29,7 +29,7 @@ export default function ContactLandlord() {
   const [email, setEmail] = useState(savedUser?.email || "");
   const [phone, setPhone] = useState("");
   const [message, setMessage] = useState(
-    `Hi, I'm interested in viewing ${property.title}.`
+    `Hi, I'm interested in viewing ${property.title}. Could you provide more information about availability, bills, deposit requirements, and viewing arrangements?`
   );
   const [submitting, setSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
@@ -54,42 +54,56 @@ export default function ContactLandlord() {
       return;
     }
 
+    if(!property.landlordEmail){
+      setErrorMessage("No landlord email is available for this property.");
+      return;
+    }
+
     try {
       setSubmitting(true);
       setErrorMessage("");
 
-      const result = await sendPropertyInquiry({
-        propertyId: property.id,
-        userId: savedUser?.id || null,
-        landlordName: managedByText,
-        fullName: fullName.trim(),
-        email: email.trim(),
-        phone: phone.trim(),
-        message: message.trim(),
-      });
+          const subject = encodeURIComponent(`Enquiry about ${property.title}`);
 
-      navigate("/message-sent", {
-        state: {
-          property,
-          inquiry: result.inquiry,
-        },
-      });
-    } catch (error) {
-      console.error("Failed to send inquiry:", error);
-      setErrorMessage(error.message || "Failed to send your message.");
-    } finally {
-      setSubmitting(false);
-    }
+          const body = encodeURIComponent(
+      `Hi ${managedByText},
+
+      I'm interested in ${property.title}.
+
+      Property address:
+      ${property.address}
+
+      My details:
+      Name: ${fullName.trim()}
+      Email: ${email.trim()}
+      Phone: ${phone.trim() || "Not provided"}
+
+      Message:
+      ${message.trim()}
+
+      Thanks,
+      ${fullName.trim()}`
+          );
+
+    window.location.href = `mailto:${property.landlordEmail}?subject=${subject}&body=${body}`;
+  } catch (error) {
+    console.error("Failed to open email client:", error);
+    setErrorMessage("Unable to open your email app.");
+  } finally {
+    setSubmitting(false);
   }
+}
 
-  return (
+
+
+return (
     <div className="page-container contact-page">
       <header className="contact-header">
         <button className="back-btn" onClick={() => navigate(-1)}>
           <ArrowLeft size={16} />
         </button>
 
-        <h1>Contact Landlord</h1>
+        <h1>Make an Enquiry</h1>
 
         <button className="home-icon-btn" onClick={() => navigate("/")}>
           <Home size={16} />
@@ -114,10 +128,10 @@ export default function ContactLandlord() {
       </section>
 
       <section className="contact-intro-card">
-        <h3>Get In Touch</h3>
+        <h3>Ask About This Property</h3>
         <p>
-          Send a message to the landlord about this property. They'll receive
-          your inquiry and respond via email or phone.
+          Fill in a few details and we’ll open your email app with a pre-written
+          enquiry. You can review it before sending.
         </p>
       </section>
 
@@ -166,7 +180,7 @@ export default function ContactLandlord() {
         <label>
           <span>Your Message *</span>
           <textarea
-            placeholder="Hi, I'm interested in viewing this property"
+            placeholder="Ask more information about this property"
             value={message}
             onChange={(e) => setMessage(e.target.value)}
             required
@@ -180,15 +194,14 @@ export default function ContactLandlord() {
 
         <button type="submit" className="primary-btn" disabled={submitting}>
           <Send size={16} />
-          <span>{submitting ? "Sending..." : "Send Message"}</span>
+          <span>{submitting ? "Opening..." : "Continue to Email"}</span>
         </button>
       </form>
 
       <div className="privacy-card">
         <p>
-          <strong>Privacy:</strong> Your contact details will only be shared
-          with the property landlord/manager. RentBuddy keeps all tenant
-          information confidential and secure.
+          <strong>Privacy:</strong> Your enquiry will open in your own email app
+          first, so you can review it before sending.
         </p>
       </div>
     </div>
