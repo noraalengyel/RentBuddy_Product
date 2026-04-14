@@ -356,7 +356,6 @@ async function handleToggleSaved() {
           }
         >
           Make an Enquiry
-          <small>via email</small>
         </button>
       </div>
     </div>
