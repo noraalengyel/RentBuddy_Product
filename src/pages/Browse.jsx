@@ -154,7 +154,7 @@ export default function Browse() {
                     {[
                         "Robert Gordon University",
                         "Aberdeen University",
-                        "NESCO",
+                        "NESCOL",
                         "City Centre",
                     ].map((item) => (
                         <button
